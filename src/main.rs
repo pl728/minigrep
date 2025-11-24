@@ -2,6 +2,7 @@ use std::env;
 use std::fs;
 use std::process;
 use std::error::Error;
+use minigrep::search;
 
 struct Config {
     query: String,
@@ -38,7 +39,10 @@ fn main() {
 fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.file_path)?;
     
-    println!("Text:\n{contents}");
+    let results = search(&config.query, &contents);
+    for r in results {
+        println!("{r}");
+    }
 
     Ok(())
 }
