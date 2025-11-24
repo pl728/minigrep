@@ -3,10 +3,12 @@ use std::fs;
 use std::process;
 use std::error::Error;
 use minigrep::search;
+use minigrep::search_lowercase;
 
 struct Config {
     query: String,
-    file_path: String
+    file_path: String,
+    ignore_case: bool
 }
 
 impl Config {
@@ -16,7 +18,8 @@ impl Config {
         }
         let query = args[1].clone();
         let file_path = args[2].clone();
-        return Ok(Config { query, file_path });
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+        return Ok(Config { query, file_path, ignore_case });
     }
 }
 
@@ -39,7 +42,13 @@ fn main() {
 fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.file_path)?;
     
-    let results = search(&config.query, &contents);
+    
+    let results = if config.ignore_case {
+        search_lowercase(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+    
     for r in results {
         println!("{r}");
     }
